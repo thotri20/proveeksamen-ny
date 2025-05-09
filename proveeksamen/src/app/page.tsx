@@ -1,7 +1,10 @@
-"use client"
-import { useState } from 'react';
+"use client";
+
+import { useState, useEffect } from 'react';
 import Product from '../components/Product';
 import Basket from '../components/Basket';
+import CookieConsent from '../components/CookieConsent';
+import Cookies from 'js-cookie';
 
 const products = [
   {
@@ -28,8 +31,30 @@ const products = [
 const Home: React.FC = () => {
   const [basket, setBasket] = useState<{ title: string; price: number }[]>([]);
 
+  // Load basket from cookies when the component mounts
+  useEffect(() => {
+    const savedBasket = Cookies.get('basket');
+    if (savedBasket) {
+      setBasket(JSON.parse(savedBasket));
+    }
+  }, []);
+
+  // Save basket to cookies whenever it changes
+  useEffect(() => {
+    Cookies.set('basket', JSON.stringify(basket), { expires: 7 });
+  }, [basket]);
+
   const handleAddToBasket = (product: { title: string; price: number }) => {
     setBasket([...basket, product]);
+  };
+
+  const handleRemoveFromBasket = (title: string) => {
+    const index = basket.findIndex(item => item.title === title);
+    if (index !== -1) {
+      const newBasket = [...basket];
+      newBasket.splice(index, 1);
+      setBasket(newBasket);
+    }
   };
 
   return (
@@ -44,7 +69,8 @@ const Home: React.FC = () => {
           />
         ))}
       </div>
-      <Basket items={basket} />
+      <Basket items={basket} onRemoveFromBasket={handleRemoveFromBasket} />
+      <CookieConsent />
     </div>
   );
 };

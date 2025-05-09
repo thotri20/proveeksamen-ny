@@ -1,4 +1,4 @@
-// components/Product.tsx
+"use client"
 import { useState } from 'react';
 
 interface ProductProps {
